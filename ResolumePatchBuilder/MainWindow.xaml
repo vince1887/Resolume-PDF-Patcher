@@ -1,0 +1,101 @@
+<Window x:Class="ResolumePatchBuilder.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="CR34TE Light | Patch Builder" Height="800" Width="1180" MinHeight="680" MinWidth="900"
+        Background="{StaticResource WindowBrush}" Foreground="#F0F0F0" FontFamily="Segoe UI">
+  <Grid Margin="28">
+    <Grid.RowDefinitions>
+      <RowDefinition Height="Auto" />
+      <RowDefinition Height="16" />
+      <RowDefinition Height="Auto" />
+      <RowDefinition Height="18" />
+      <RowDefinition Height="Auto" />
+      <RowDefinition Height="18" />
+      <RowDefinition Height="*" />
+      <RowDefinition Height="18" />
+      <RowDefinition Height="Auto" />
+    </Grid.RowDefinitions>
+    <DockPanel Grid.Row="0">
+      <StackPanel>
+        <TextBlock Text="CR34TE Light" Foreground="{StaticResource AccentBrush}" FontSize="12" FontWeight="Bold" />
+        <TextBlock Text="Patch Builder" FontSize="28" FontWeight="SemiBold" Margin="0,4,0,0" />
+      </StackPanel>
+      <TextBlock DockPanel.Dock="Right" Text="RESOLUME / ADVANCED OUTPUT" Foreground="{StaticResource MutedBrush}" FontSize="11" VerticalAlignment="Bottom" />
+    </DockPanel>
+    <UniformGrid Grid.Row="2" Columns="3">
+      <Border Background="{StaticResource PanelBrush}" BorderBrush="{StaticResource LineBrush}" BorderThickness="1" CornerRadius="3" Padding="14" Margin="0,0,8,0">
+        <StackPanel><TextBlock Text="FIXTURES" Foreground="{StaticResource MutedBrush}" FontSize="10" FontWeight="Bold" /><TextBlock x:Name="FixtureMetric" Text="--" Foreground="{StaticResource AccentBrush}" FontSize="22" FontWeight="SemiBold" Margin="0,5,0,0" /></StackPanel>
+      </Border>
+      <Border Background="{StaticResource PanelBrush}" BorderBrush="{StaticResource LineBrush}" BorderThickness="1" CornerRadius="3" Padding="14" Margin="4,0">
+        <StackPanel><TextBlock Text="LUMIVERSES / NODES" Foreground="{StaticResource MutedBrush}" FontSize="10" FontWeight="Bold" /><TextBlock x:Name="LumiverseMetric" Text="--" Foreground="{StaticResource AccentBrush}" FontSize="22" FontWeight="SemiBold" Margin="0,5,0,0" /></StackPanel>
+      </Border>
+      <Border Background="{StaticResource PanelBrush}" BorderBrush="{StaticResource LineBrush}" BorderThickness="1" CornerRadius="3" Padding="14" Margin="8,0,0,0">
+        <StackPanel><TextBlock Text="LOGICAL PIXELS" Foreground="{StaticResource MutedBrush}" FontSize="10" FontWeight="Bold" /><TextBlock x:Name="PixelMetric" Text="--" Foreground="{StaticResource AccentBrush}" FontSize="22" FontWeight="SemiBold" Margin="0,5,0,0" /></StackPanel>
+      </Border>
+    </UniformGrid>
+    <Border Grid.Row="4" Background="{StaticResource PanelBrush}" BorderBrush="{StaticResource LineBrush}" BorderThickness="1" CornerRadius="4" Padding="16">
+      <Grid>
+        <Grid.ColumnDefinitions>
+          <ColumnDefinition Width="*" />
+          <ColumnDefinition Width="Auto" />
+          <ColumnDefinition Width="12" />
+          <ColumnDefinition Width="Auto" />
+        </Grid.ColumnDefinitions>
+        <StackPanel VerticalAlignment="Center">
+          <TextBlock Text="SOURCE XML" Foreground="{StaticResource MutedBrush}" FontSize="10" FontWeight="Bold" />
+          <TextBlock x:Name="SourcePathText" Text="Choose an Advanced Output XML file to begin" Margin="0,6,0,0" FontSize="13" TextTrimming="CharacterEllipsis" />
+        </StackPanel>
+        <Button x:Name="BrowseButton" Grid.Column="1" Content="Choose XML" Click="BrowseButton_Click" />
+        <Button x:Name="ConvertButton" Grid.Column="3" Content="Analyze XML" Background="{StaticResource AccentBrush}" Foreground="#1A2114" BorderBrush="{StaticResource AccentBrush}" IsEnabled="False" Click="ConvertButton_Click" />
+      </Grid>
+    </Border>
+    <Grid Grid.Row="6">
+      <Grid.RowDefinitions>
+        <RowDefinition Height="Auto" />
+        <RowDefinition Height="12" />
+        <RowDefinition Height="*" />
+      </Grid.RowDefinitions>
+      <DockPanel>
+        <TextBlock Text="Lumiverse patch" FontSize="17" FontWeight="SemiBold" />
+        <TextBlock x:Name="SummaryText" DockPanel.Dock="Right" Text="No output analyzed" Foreground="{StaticResource MutedBrush}" FontSize="12" VerticalAlignment="Center" />
+      </DockPanel>
+      <Border Grid.Row="2" Background="{StaticResource PanelBrush}" BorderBrush="{StaticResource LineBrush}" BorderThickness="1" CornerRadius="4">
+        <DataGrid x:Name="PatchGrid" AutoGenerateColumns="False" CanUserAddRows="False" IsReadOnly="False" GridLinesVisibility="Horizontal" HorizontalGridLinesBrush="{StaticResource LineBrush}" Background="{StaticResource PanelBrush}" Foreground="#F0F0F0" BorderThickness="0" RowBackground="#1E1E1E" AlternatingRowBackground="#202020" HeadersVisibility="Column" SelectionMode="Single" CanUserSortColumns="True">
+          <DataGrid.GroupStyle>
+            <GroupStyle>
+              <GroupStyle.HeaderTemplate>
+                <DataTemplate>
+                  <TextBlock Text="{Binding Name}" Foreground="{StaticResource AccentBrush}" FontWeight="Bold" Padding="8,7" />
+                </DataTemplate>
+              </GroupStyle.HeaderTemplate>
+            </GroupStyle>
+            <GroupStyle>
+              <GroupStyle.HeaderTemplate>
+                <DataTemplate>
+                  <TextBlock Text="{Binding Name}" Foreground="#D0D0D0" FontWeight="SemiBold" Padding="22,6,8,6" />
+                </DataTemplate>
+              </GroupStyle.HeaderTemplate>
+            </GroupStyle>
+          </DataGrid.GroupStyle>
+          <DataGrid.Columns>
+            <DataGridTextColumn Header="FIXTURE" Binding="{Binding Name}" Width="2*" IsReadOnly="True" />
+            <DataGridTextColumn Header="START ADDRESS" Binding="{Binding Address}" Width="110" IsReadOnly="True" />
+            <DataGridTextColumn Header="CHANNELS" Binding="{Binding Channels}" Width="90" IsReadOnly="True" />
+            <DataGridTextColumn Header="END" Binding="{Binding EndAddress}" Width="74" IsReadOnly="True" />
+            <DataGridTextColumn Header="PIXEL MAP" Binding="{Binding PixelSize}" Width="100" IsReadOnly="True" />
+            <DataGridTextColumn Header="FORMAT" Binding="{Binding ColorFormat}" Width="90" IsReadOnly="True" />
+            <DataGridTextColumn Header="ID" Binding="{Binding FixtureId, UpdateSourceTrigger=PropertyChanged}" Width="110" IsReadOnly="False" />
+          </DataGrid.Columns>
+        </DataGrid>
+      </Border>
+    </Grid>
+    <DockPanel Grid.Row="8">
+      <TextBlock x:Name="StatusText" Text="Ready" Foreground="{StaticResource MutedBrush}" FontSize="12" VerticalAlignment="Center" />
+      <StackPanel DockPanel.Dock="Right" Orientation="Horizontal">
+        <Button x:Name="SaveCsvButton" Content="Save CSV" IsEnabled="False" Click="SaveCsvButton_Click" />
+        <Button x:Name="SavePdfButton" Content="Save PDF" Margin="10,0,0,0" IsEnabled="False" Click="SavePdfButton_Click" />
+        <Button x:Name="SavePixelMapButton" Content="Save Pixel Map" Margin="10,0,0,0" IsEnabled="False" Click="SavePixelMapButton_Click" />
+      </StackPanel>
+    </DockPanel>
+  </Grid>
+</Window>

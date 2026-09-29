@@ -1,0 +1,46 @@
+<Wix xmlns="http://wixtoolset.org/schemas/v4/wxs"
+     xmlns:ui="http://wixtoolset.org/schemas/v4/wxs/ui">
+  <Package Name="CR34TE Light Patch Builder"
+           Manufacturer="CR34TE Light"
+           Version="1.0.1"
+           UpgradeCode="7B2C2DF7-8A8C-4678-9B1C-1F1A8AC34E06"
+           Scope="perMachine">
+    <MajorUpgrade DowngradeErrorMessage="A newer version of CR34TE Light Patch Builder is already installed." />
+    <MediaTemplate EmbedCab="yes" />
+
+    <ui:WixUI Id="WixUI_Minimal" />
+
+    <Feature Id="MainFeature" Title="CR34TE Light Patch Builder" Level="1">
+      <ComponentGroupRef Id="AppFiles" />
+      <ComponentGroupRef Id="StartMenuShortcuts" />
+    </Feature>
+
+    <StandardDirectory Id="ProgramFiles64Folder">
+      <Directory Id="INSTALLFOLDER" Name="CR34TE Light Patch Builder" />
+    </StandardDirectory>
+
+    <StandardDirectory Id="ProgramMenuFolder">
+      <Directory Id="ProgramMenuApplicationFolder" Name="CR34TE Light Patch Builder" />
+    </StandardDirectory>
+
+    <ComponentGroup Id="AppFiles" Directory="INSTALLFOLDER">
+      <Files Include="$(var.AppPublishDir)\**" />
+    </ComponentGroup>
+
+    <ComponentGroup Id="StartMenuShortcuts" Directory="ProgramMenuApplicationFolder">
+      <Component Id="StartMenuShortcut" Guid="A8A93956-3AFB-44E7-8D93-1F0392F27B06">
+        <Shortcut Id="LaunchPatchBuilder"
+                  Name="CR34TE Light Patch Builder"
+                  Target="[INSTALLFOLDER]ResolumePatchBuilder.exe"
+                  WorkingDirectory="INSTALLFOLDER" />
+        <RemoveFolder Id="RemoveStartMenuFolder" On="uninstall" />
+        <RegistryValue Root="HKCU"
+                       Key="Software\CR34TE Light\Patch Builder"
+                       Name="Installed"
+                       Type="integer"
+                       Value="1"
+                       KeyPath="yes" />
+      </Component>
+    </ComponentGroup>
+  </Package>
+</Wix>

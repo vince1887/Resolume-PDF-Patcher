@@ -1,0 +1,19 @@
+# .NET and Visual Studio build output
+**/bin/
+**/obj/
+.vs/
+TestResults/
+*.user
+*.suo
+
+# WiX installer output
+*.msi
+*.wixpdb
+
+# Locally generated distribution archives and CI artifacts
+*.zip
+/artifacts/
+
+# IDE/editor metadata
+.idea/
+*.DotSettings.user

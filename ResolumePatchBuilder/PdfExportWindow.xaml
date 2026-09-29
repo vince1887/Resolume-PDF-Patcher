@@ -1,0 +1,65 @@
+<Window x:Class="ResolumePatchBuilder.PdfExportWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="Customize PDF" Width="680" Height="760" MinWidth="620" MinHeight="680"
+        WindowStartupLocation="CenterOwner" ResizeMode="CanResizeWithGrip"
+        Background="{StaticResource WindowBrush}" Foreground="#F0F0F0" FontFamily="Segoe UI">
+  <Grid Margin="24">
+    <Grid.RowDefinitions>
+      <RowDefinition Height="Auto" />
+      <RowDefinition Height="*" />
+      <RowDefinition Height="Auto" />
+    </Grid.RowDefinitions>
+    <StackPanel Margin="0,0,0,18">
+      <TextBlock Text="CR34TE Light" Foreground="{StaticResource AccentBrush}" FontSize="12" FontWeight="Bold" />
+      <TextBlock Text="Customize PDF" FontSize="24" FontWeight="SemiBold" Margin="0,4,0,0" />
+    </StackPanel>
+    <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto">
+      <StackPanel>
+        <TextBlock Text="REPORT TEXT" Foreground="{StaticResource AccentBrush}" FontSize="10" FontWeight="Bold" Margin="0,0,0,10" />
+        <TextBlock Text="Title" Foreground="{StaticResource MutedBrush}" />
+        <TextBox x:Name="TitleInput" Margin="0,4,0,10" />
+        <TextBlock Text="Subtitle" Foreground="{StaticResource MutedBrush}" />
+        <TextBox x:Name="SubtitleInput" Margin="0,4,0,10" />
+        <TextBlock Text="Footer note" Foreground="{StaticResource MutedBrush}" />
+        <TextBox x:Name="FooterInput" Margin="0,4,0,18" />
+
+        <TextBlock Text="PAGE DESIGN" Foreground="{StaticResource AccentBrush}" FontSize="10" FontWeight="Bold" Margin="0,0,0,10" />
+        <Grid Margin="0,0,0,12">
+          <Grid.ColumnDefinitions><ColumnDefinition Width="*" /><ColumnDefinition Width="16" /><ColumnDefinition Width="*" /><ColumnDefinition Width="16" /><ColumnDefinition Width="*" /></Grid.ColumnDefinitions>
+          <StackPanel><TextBlock Text="Paper" Foreground="{StaticResource MutedBrush}" /><ComboBox x:Name="PageSizeInput" Margin="0,4,0,0"><ComboBoxItem Content="A4" /><ComboBoxItem Content="Letter" /></ComboBox></StackPanel>
+          <StackPanel Grid.Column="2"><TextBlock Text="Orientation" Foreground="{StaticResource MutedBrush}" /><ComboBox x:Name="OrientationInput" Margin="0,4,0,0"><ComboBoxItem Content="Landscape" /><ComboBoxItem Content="Portrait" /></ComboBox></StackPanel>
+          <StackPanel Grid.Column="4"><TextBlock Text="Font size" Foreground="{StaticResource MutedBrush}" /><ComboBox x:Name="FontSizeInput" Margin="0,4,0,0"><ComboBoxItem Content="7" /><ComboBoxItem Content="8" /><ComboBoxItem Content="9" /><ComboBoxItem Content="10" /><ComboBoxItem Content="11" /><ComboBoxItem Content="12" /><ComboBoxItem Content="14" /></ComboBox></StackPanel>
+        </Grid>
+        <TextBlock Text="Accent color (hex)" Foreground="{StaticResource MutedBrush}" />
+        <TextBox x:Name="AccentInput" Margin="0,4,0,16" />
+
+        <TextBlock Text="REPORT CONTENT" Foreground="{StaticResource AccentBrush}" FontSize="10" FontWeight="Bold" Margin="0,0,0,10" />
+        <UniformGrid Columns="2" Margin="0,0,0,8">
+          <CheckBox x:Name="ShowSourceInput" Content="Show source filename" />
+          <CheckBox x:Name="ShowDateInput" Content="Show generated date" />
+          <CheckBox x:Name="ShowLumiverseInput" Content="Group by Lumiverse / node" />
+          <CheckBox x:Name="ShowArtNetInput" Content="Group by Node Port Address" />
+        </UniformGrid>
+        <TextBlock Text="Table columns" Foreground="{StaticResource MutedBrush}" Margin="0,4,0,8" />
+        <UniformGrid Columns="3">
+          <CheckBox x:Name="FixtureInput" Content="Fixture" />
+          <CheckBox x:Name="UniverseInput" Content="Universe" />
+          <CheckBox x:Name="StartAddressInput" Content="Start address" />
+          <CheckBox x:Name="ChannelsInput" Content="Channels" />
+          <CheckBox x:Name="EndAddressInput" Content="End address" />
+          <CheckBox x:Name="PixelsInput" Content="Pixel dimensions" />
+          <CheckBox x:Name="ColorFormatInput" Content="Color format" />
+          <CheckBox x:Name="FixtureIdInput" Content="Fixture ID" />
+        </UniformGrid>
+      </StackPanel>
+    </ScrollViewer>
+    <DockPanel Grid.Row="2" Margin="0,18,0,0">
+      <TextBlock Text="Changes apply to this PDF export." Foreground="{StaticResource MutedBrush}" VerticalAlignment="Center" />
+      <StackPanel DockPanel.Dock="Right" Orientation="Horizontal">
+        <Button Content="Cancel" Click="CancelButton_Click" />
+        <Button Content="Continue to Save" Margin="10,0,0,0" Background="{StaticResource AccentBrush}" Foreground="#171717" BorderBrush="{StaticResource AccentBrush}" Click="ContinueButton_Click" />
+      </StackPanel>
+    </DockPanel>
+  </Grid>
+</Window>
