@@ -9,7 +9,7 @@ namespace Cr34teLightPatchBuilder;
 public static class AdvancedOutputXmlParser
 {
     private static readonly Regex LeadingChannelRange = new(
-        @"^\s*\d+\s*[-–—]\s*\d+\s+",
+        @"^\s*(?<start>\d+)\s*[-–—]\s*(?<end>\d+)\s+",
         RegexOptions.CultureInvariant | RegexOptions.Compiled);
 
     public static IReadOnlyList<PatchEntry> Parse(string filePath)
@@ -37,10 +37,11 @@ public static class AdvancedOutputXmlParser
 
             foreach (var slice in slices)
             {
-                var sliceName = GetFixtureName(ParameterValue(slice, "Name"), entries.Count + 1);
+                var rawSliceName = ParameterValue(slice, "Name");
+                var sliceName = GetFixtureName(rawSliceName, entries.Count + 1);
                 var startText = FindGroupValue(slice, "Input", "Start Channel");
                 var start = ParsePositiveInteger(startText);
-                var channelCount = GetChannelCount(slice);
+                var channelCount = GetChannelCount(slice, rawSliceName);
                 var end = start.HasValue && channelCount.HasValue ? start.Value + channelCount.Value - 1 : (int?)null;
                 var pixelData = GetPixelData(slice);
 
@@ -108,8 +109,18 @@ public static class AdvancedOutputXmlParser
         return parts.FirstOrDefault() == "TT_BROADCAST" ? "Broadcast" : string.Empty;
     }
 
-    private static int? GetChannelCount(XElement slice)
+    private static int? GetChannelCount(XElement slice, string? rawSliceName)
     {
+        var namedRange = LeadingChannelRange.Match(rawSliceName ?? string.Empty);
+        if (namedRange.Success &&
+            int.TryParse(namedRange.Groups["start"].Value, NumberStyles.None, CultureInfo.InvariantCulture, out var rangeStart) &&
+            int.TryParse(namedRange.Groups["end"].Value, NumberStyles.None, CultureInfo.InvariantCulture, out var rangeEnd) &&
+            rangeStart > 0 &&
+            rangeEnd >= rangeStart)
+        {
+            return rangeEnd - rangeStart + 1;
+        }
+
         var data = GetPixelData(slice);
         return data.Width.HasValue && data.Height.HasValue && data.Components.HasValue
             ? checked(data.Width.Value * data.Height.Value * data.Components.Value)
@@ -131,7 +142,8 @@ public static class AdvancedOutputXmlParser
         {
             "rgb" or "bgr" or "cmy" => 3,
             "rgba" or "argb" or "rgbw" => 4,
-            "r" or "mono" or "monochrome" or "white" => 1,
+            "rgbwa" => 5,
+            "r" or "l" or "mono" or "monochrome" or "white" => 1,
             _ => (int?)null
         };
 

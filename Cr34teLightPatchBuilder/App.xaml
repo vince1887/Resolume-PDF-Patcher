@@ -18,22 +18,22 @@
       <Setter Property="FontSize" Value="13" />
     </Style>
     <Style TargetType="ComboBox">
-      <Setter Property="Foreground" Value="#F0F0F0" />
-      <Setter Property="Background" Value="#252525" />
+      <Setter Property="Foreground" Value="#171717" />
+      <Setter Property="Background" Value="#FFFFFF" />
       <Setter Property="BorderBrush" Value="#555555" />
       <Setter Property="Padding" Value="8,6" />
       <Setter Property="FontSize" Value="13" />
     </Style>
     <Style TargetType="ComboBoxItem">
-      <Setter Property="Foreground" Value="#F0F0F0" />
-      <Setter Property="Background" Value="#252525" />
+      <Setter Property="Foreground" Value="#171717" />
+      <Setter Property="Background" Value="#FFFFFF" />
       <Setter Property="Padding" Value="8,6" />
       <Style.Triggers>
         <Trigger Property="IsHighlighted" Value="True">
-          <Setter Property="Background" Value="#3A2A14" />
+          <Setter Property="Background" Value="#FFE2B3" />
         </Trigger>
         <Trigger Property="IsSelected" Value="True">
-          <Setter Property="Background" Value="#3A2A14" />
+          <Setter Property="Background" Value="#FFE2B3" />
         </Trigger>
       </Style.Triggers>
     </Style>

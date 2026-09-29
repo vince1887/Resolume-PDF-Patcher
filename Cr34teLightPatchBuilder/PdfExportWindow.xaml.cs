@@ -22,7 +22,6 @@ public partial class PdfExportWindow : Window
         AccentInput.Text = Options.AccentHex;
         SelectItem(PageSizeInput, Options.PageSize);
         SelectItem(OrientationInput, Options.Landscape ? "Landscape" : "Portrait");
-        SelectItem(FontSizeInput, Options.FontSize.ToString());
         ShowSourceInput.IsChecked = Options.ShowSourceFile;
         ShowDateInput.IsChecked = Options.ShowGeneratedDate;
         ShowLumiverseInput.IsChecked = Options.ShowLumiverseGroups;
@@ -76,7 +75,6 @@ public partial class PdfExportWindow : Window
         Options.AccentHex = accent;
         Options.PageSize = ((ComboBoxItem)PageSizeInput.SelectedItem).Content.ToString()!;
         Options.Landscape = ((ComboBoxItem)OrientationInput.SelectedItem).Content?.ToString() == "Landscape";
-        Options.FontSize = int.Parse(((ComboBoxItem)FontSizeInput.SelectedItem).Content.ToString()!);
         Options.ShowSourceFile = ShowSourceInput.IsChecked == true;
         Options.ShowGeneratedDate = ShowDateInput.IsChecked == true;
         Options.ShowLumiverseGroups = ShowLumiverseInput.IsChecked == true;

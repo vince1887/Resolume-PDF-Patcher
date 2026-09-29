@@ -8,6 +8,7 @@ namespace Cr34teLightPatchBuilder;
 
 public static class PatchExporter
 {
+    private const int PdfFontSize = 10;
     private static readonly string[] Headers = ["Lumiverse", "Node IP", "Node Port Address", "Subnet", "Universe", "Fixture", "Start address", "Channels", "End address", "Pixels", "Format", "ID"];
     private static readonly string[] PixelHeaders = ["Lumiverse", "Node IP", "Node Port Address", "Universe", "Fixture", "Fixture ID", "Pixel #", "X", "Y", "DMX start", "DMX end", "Color format", "Resolume distribution", "Order note"];
 
@@ -68,13 +69,15 @@ public static class PatchExporter
     {
         var document = new PdfDocument();
         document.Info.Title = options.Title;
-        var font = new XFont("Arial", options.FontSize, XFontStyleEx.Regular);
-        var boldFont = new XFont("Arial", options.FontSize, XFontStyleEx.Bold);
-        var titleFont = new XFont("Arial", options.FontSize + 7, XFontStyleEx.Bold);
+        var font = new XFont("Arial", PdfFontSize, XFontStyleEx.Regular);
+        var boldFont = new XFont("Arial", PdfFontSize, XFontStyleEx.Bold);
+        var titleFont = new XFont("Arial", PdfFontSize + 7, XFontStyleEx.Bold);
         var columns = GetPdfColumns(options);
         var pageWidth = options.Landscape ? 842d : 595d;
         const double margin = 32;
-        const double rowHeight = 24;
+        const double minimumRowHeight = 24;
+        const double cellPadding = 4;
+        var lineHeight = PdfFontSize * 1.25;
         var availableWidth = pageWidth - margin * 2;
         var unitSum = columns.Sum(column => column.WidthUnits);
         var widths = columns.Select(column => availableWidth * column.WidthUnits / unitSum).ToArray();
@@ -86,6 +89,7 @@ public static class PatchExporter
         PdfPage page = null!;
         double y = 0;
         var pageNumber = 0;
+        var includeTableHeaderOnNewPage = false;
 
         void AddPage()
         {
@@ -102,14 +106,14 @@ public static class PatchExporter
             y = margin;
             if (!string.IsNullOrWhiteSpace(options.Title))
             {
-                graphics.DrawString(options.Title, titleFont, accentBrush, new XPoint(margin, y + options.FontSize + 4));
-                y += options.FontSize + 12;
+                graphics.DrawString(options.Title, titleFont, accentBrush, new XPoint(margin, y + PdfFontSize + 4));
+                y += PdfFontSize + 12;
             }
 
             if (!string.IsNullOrWhiteSpace(options.Subtitle))
             {
-                graphics.DrawString(options.Subtitle, boldFont, XBrushes.DimGray, new XPoint(margin, y + options.FontSize));
-                y += options.FontSize + 7;
+                graphics.DrawString(options.Subtitle, boldFont, XBrushes.DimGray, new XPoint(margin, y + PdfFontSize));
+                y += PdfFontSize + 7;
             }
 
             var metadata = new List<string>();
@@ -123,11 +127,11 @@ public static class PatchExporter
             }
             if (metadata.Count > 0)
             {
-                graphics.DrawString(string.Join("    |    ", metadata), font, XBrushes.DimGray, new XPoint(margin, y + options.FontSize));
-                y += options.FontSize + 8;
+                graphics.DrawString(string.Join("    |    ", metadata), font, XBrushes.DimGray, new XPoint(margin, y + PdfFontSize));
+                y += PdfFontSize + 8;
             }
 
-            if (columns.Count > 0)
+            if (includeTableHeaderOnNewPage && columns.Count > 0)
             {
                 DrawRow(columns.Select(column => column.Header).ToArray(), true);
             }
@@ -135,8 +139,12 @@ public static class PatchExporter
 
         void DrawRow(IReadOnlyList<string> values, bool isHeader)
         {
-            var x = margin;
             currentFont = isHeader ? boldFont : font;
+            var wrappedValues = values
+                .Select((value, index) => WrapText(value, currentFont, widths[index] - cellPadding * 2, graphics))
+                .ToArray();
+            var rowHeight = Math.Max(minimumRowHeight, wrappedValues.Max(lines => lines.Count) * lineHeight + cellPadding * 2);
+            var x = margin;
             if (isHeader)
             {
                 graphics.DrawRectangle(paleAccentBrush, margin, y, widths.Sum(), rowHeight);
@@ -144,8 +152,18 @@ public static class PatchExporter
 
             for (var column = 0; column < values.Count; column++)
             {
-                var layout = new XRect(x + 4, y + 3, widths[column] - 8, rowHeight - 6);
-                graphics.DrawString(values[column], currentFont, XBrushes.Black, layout, XStringFormats.TopLeft);
+                for (var line = 0; line < wrappedValues[column].Count; line++)
+                {
+                    var layout = new XRect(
+                        x + cellPadding,
+                        y + cellPadding + line * lineHeight,
+                        widths[column] - cellPadding * 2,
+                        lineHeight);
+                    var format = columns[column].Header is "Fixture" or "Node IP"
+                        ? XStringFormats.CenterLeft
+                        : XStringFormats.Center;
+                    graphics.DrawString(wrappedValues[column][line], currentFont, XBrushes.Black, layout, format);
+                }
                 x += widths[column];
             }
 
@@ -154,11 +172,43 @@ public static class PatchExporter
         }
 
         AddPage();
+        DrawSummarySection(
+            "NODE SUMMARY",
+            entries
+                .Where(entry => !string.IsNullOrWhiteSpace(entry.NodeIP))
+                .GroupBy(entry => entry.NodeIP, StringComparer.OrdinalIgnoreCase)
+                .OrderBy(group => group.Key, StringComparer.OrdinalIgnoreCase)
+                .Select(group =>
+                {
+                    var lumiverseCount = group.Select(entry => entry.LumiverseName)
+                        .Distinct(StringComparer.OrdinalIgnoreCase)
+                        .Count();
+                    var portAddresses = string.Join(", ", group
+                        .Select(entry => entry.ArtNetPort)
+                        .Distinct(StringComparer.Ordinal)
+                        .OrderBy(port => int.TryParse(port, NumberStyles.Integer, CultureInfo.InvariantCulture, out var number) ? number : int.MaxValue)
+                        .ThenBy(port => port, StringComparer.Ordinal));
+                    return $"{group.Key}  |  {lumiverseCount} Lumiverses  |  Node Port Addresses: {portAddresses}";
+                }));
+        DrawSummarySection(
+            "FIXTURE INVENTORY",
+            entries
+                .GroupBy(entry => entry.Name, StringComparer.OrdinalIgnoreCase)
+                .OrderBy(group => group.Key, StringComparer.OrdinalIgnoreCase)
+                .Select(group => $"{group.Count()} x {group.Key}"));
+
+        EnsureSpace(minimumRowHeight);
+        includeTableHeaderOnNewPage = true;
+        if (columns.Count > 0)
+        {
+            DrawRow(columns.Select(column => column.Header).ToArray(), true);
+        }
+
         foreach (var lumiverseGroup in entries.GroupBy(entry => new { entry.LumiverseName, entry.NodeIP }))
         {
             if (options.ShowLumiverseGroups)
             {
-                EnsureSpace(rowHeight);
+                EnsureSpace(minimumRowHeight);
                 DrawGroupRow($"{lumiverseGroup.Key.LumiverseName}  |  {lumiverseGroup.Key.NodeIP}", boldFont, accentBrush);
             }
 
@@ -166,14 +216,16 @@ public static class PatchExporter
             {
                 if (options.ShowArtNetGroups)
                 {
-                    EnsureSpace(rowHeight);
+                    EnsureSpace(minimumRowHeight);
                     DrawGroupRow($"Node Port Address {portGroup.Key.ArtNetPort}  |  Subnet {portGroup.Key.Subnet}  |  Universe {portGroup.Key.Universe}", boldFont, XBrushes.DimGray);
                 }
 
                 foreach (var entry in portGroup)
                 {
+                    var values = columns.Select(column => column.Value(entry)).ToArray();
+                    var rowHeight = GetRowHeight(values, font, widths, cellPadding, lineHeight, graphics, minimumRowHeight);
                     EnsureSpace(rowHeight);
-                    DrawRow(columns.Select(column => column.Value(entry)).ToArray(), false);
+                    DrawRow(values, false);
                 }
             }
         }
@@ -183,7 +235,7 @@ public static class PatchExporter
 
         void EnsureSpace(double height)
         {
-            if (y + height > page.Height.Point - margin - options.FontSize - 12)
+            if (y + height > page.Height.Point - margin - PdfFontSize - 12)
             {
                 AddPage();
             }
@@ -191,9 +243,38 @@ public static class PatchExporter
 
         void DrawGroupRow(string text, XFont groupFont, XBrush brush)
         {
-            graphics.DrawRectangle(paleAccentBrush, margin, y, widths.Sum(), rowHeight);
-            graphics.DrawString(text, groupFont, brush, new XRect(margin + 5, y + 4, widths.Sum() - 10, rowHeight - 8), XStringFormats.TopLeft);
-            y += rowHeight;
+            graphics.DrawRectangle(paleAccentBrush, margin, y, widths.Sum(), minimumRowHeight);
+            graphics.DrawString(text, groupFont, brush, new XRect(margin + 5, y + 4, widths.Sum() - 10, minimumRowHeight - 8), XStringFormats.TopLeft);
+            y += minimumRowHeight;
+        }
+
+        void DrawSummarySection(string title, IEnumerable<string> lines)
+        {
+            var summaryWidth = page.Width.Point - margin * 2;
+            var summaryLineHeight = PdfFontSize * 1.3;
+            EnsureSpace(summaryLineHeight + cellPadding * 2);
+            graphics.DrawString(title, boldFont, accentBrush, new XRect(margin, y, summaryWidth, summaryLineHeight), XStringFormats.CenterLeft);
+            y += summaryLineHeight + cellPadding;
+
+            foreach (var text in lines)
+            {
+                var wrappedLines = WrapText(text, font, summaryWidth - cellPadding * 2, graphics);
+                var summaryHeight = wrappedLines.Count * lineHeight + cellPadding * 2;
+                EnsureSpace(summaryHeight);
+                for (var line = 0; line < wrappedLines.Count; line++)
+                {
+                    graphics.DrawString(
+                        wrappedLines[line],
+                        font,
+                        XBrushes.DimGray,
+                        new XRect(margin + cellPadding, y + cellPadding + line * lineHeight, summaryWidth - cellPadding * 2, lineHeight),
+                        XStringFormats.CenterLeft);
+                }
+
+                y += summaryHeight;
+            }
+
+            y += cellPadding * 2;
         }
 
         void DrawFooter()
@@ -202,11 +283,74 @@ public static class PatchExporter
             if (!string.IsNullOrWhiteSpace(options.Footer))
             {
                 graphics.DrawString(options.Footer, font, XBrushes.DimGray,
-                    new XRect(margin, page.Height.Point - margin + 5, page.Width.Point - margin * 2 - 50, options.FontSize + 6), XStringFormats.TopLeft);
+                    new XRect(margin, page.Height.Point - margin + 5, page.Width.Point - margin * 2 - 50, PdfFontSize + 6), XStringFormats.TopLeft);
             }
             graphics.DrawString(pageNumber.ToString(CultureInfo.InvariantCulture), font, XBrushes.DimGray,
-                new XRect(page.Width.Point - margin - 30, page.Height.Point - margin + 5, 30, options.FontSize + 6), XStringFormats.TopRight);
+                new XRect(page.Width.Point - margin - 30, page.Height.Point - margin + 5, 30, PdfFontSize + 6), XStringFormats.TopRight);
         }
+    }
+
+    private static double GetRowHeight(
+        IReadOnlyList<string> values,
+        XFont font,
+        IReadOnlyList<double> widths,
+        double cellPadding,
+        double lineHeight,
+        XGraphics graphics,
+        double minimumRowHeight)
+    {
+        var maxLines = values
+            .Select((value, index) => WrapText(value, font, widths[index] - cellPadding * 2, graphics).Count)
+            .Max();
+        return Math.Max(minimumRowHeight, maxLines * lineHeight + cellPadding * 2);
+    }
+
+    private static List<string> WrapText(string value, XFont font, double maxWidth, XGraphics graphics)
+    {
+        var lines = new List<string>();
+        var paragraphs = value.Replace("\r\n", "\n", StringComparison.Ordinal).Split('\n');
+        foreach (var paragraph in paragraphs)
+        {
+            var currentLine = new StringBuilder();
+            var words = paragraph.Split((char[]?)null, StringSplitOptions.RemoveEmptyEntries);
+            foreach (var word in words)
+            {
+                var candidate = currentLine.Length == 0 ? word : $"{currentLine} {word}";
+                if (graphics.MeasureString(candidate, font).Width <= maxWidth)
+                {
+                    currentLine.Clear();
+                    currentLine.Append(candidate);
+                    continue;
+                }
+
+                if (currentLine.Length > 0)
+                {
+                    lines.Add(currentLine.ToString());
+                    currentLine.Clear();
+                }
+
+                var textElements = StringInfo.GetTextElementEnumerator(word);
+                while (textElements.MoveNext())
+                {
+                    var element = textElements.GetTextElement();
+                    candidate = currentLine.Length == 0 ? element : $"{currentLine}{element}";
+                    if (graphics.MeasureString(candidate, font).Width <= maxWidth)
+                    {
+                        currentLine.Append(element);
+                    }
+                    else
+                    {
+                        lines.Add(currentLine.ToString());
+                        currentLine.Clear();
+                        currentLine.Append(element);
+                    }
+                }
+            }
+
+            lines.Add(currentLine.ToString());
+        }
+
+        return lines;
     }
 
     private static List<(string Header, Func<PatchEntry, string> Value, double WidthUnits)> GetPdfColumns(PdfExportOptions options)

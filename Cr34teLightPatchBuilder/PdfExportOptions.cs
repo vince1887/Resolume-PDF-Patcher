@@ -8,7 +8,6 @@ public sealed class PdfExportOptions
     public string AccentHex { get; set; } = "#F99B06";
     public string PageSize { get; set; } = "A4";
     public bool Landscape { get; set; } = true;
-    public int FontSize { get; set; } = 9;
     public bool ShowSourceFile { get; set; } = true;
     public bool ShowGeneratedDate { get; set; } = true;
     public bool ShowLumiverseGroups { get; set; } = true;
