@@ -11,6 +11,8 @@ The x64 MSI installs the application and its runtime dependencies, creates a Sta
 
 Installed copies check GitHub Releases at startup. When a newer stable version is available, the app asks before downloading and launching the MSI installer to upgrade. Choose **No** to keep using the current version.
 
+The GitHub repository and its releases must be public for the download links and automatic update checks to work for everyone.
+
 ## Build from source
 
 Requirements: Windows, .NET 8 SDK, and the WiX Toolset SDK packages restored by the project.

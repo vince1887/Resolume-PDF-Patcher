@@ -8,7 +8,7 @@ $installerProject = Join-Path $PSScriptRoot "Installer\PatchBuilderInstaller.wix
 $publishDirectory = Join-Path $PSScriptRoot "artifacts\publish"
 $installerDirectory = Join-Path $PSScriptRoot "artifacts\installer"
 
-if ($Version -notmatch '^\d+\.\d+\.\d+(\.\d+)?$') {
+if ($Version -notmatch '^\d+\.\d+\.\d+$') {
     throw "Version must be numeric, for example 1.0.2."
 }
 
