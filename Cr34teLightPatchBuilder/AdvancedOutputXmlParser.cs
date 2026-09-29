@@ -1,5 +1,6 @@
 using System.Buffers.Binary;
 using System.Globalization;
+using System.Text.RegularExpressions;
 using System.Xml;
 using System.Xml.Linq;
 
@@ -7,6 +8,10 @@ namespace Cr34teLightPatchBuilder;
 
 public static class AdvancedOutputXmlParser
 {
+    private static readonly Regex LeadingChannelRange = new(
+        @"^\s*\d+\s*[-–—]\s*\d+\s+",
+        RegexOptions.CultureInvariant | RegexOptions.Compiled);
+
     public static IReadOnlyList<PatchEntry> Parse(string filePath)
     {
         var settings = new XmlReaderSettings { DtdProcessing = DtdProcessing.Prohibit, XmlResolver = null };
@@ -26,13 +31,13 @@ public static class AdvancedOutputXmlParser
                 configuredLumiverseName,
                 screenElementName);
             var artNetPort = int.TryParse(subnet, out var subnetNumber) && int.TryParse(universe, out var universeNumber)
-                ? Math.Max(0, subnetNumber * 16 + universeNumber - 1).ToString(CultureInfo.InvariantCulture)
+                ? (subnetNumber * 16 + universeNumber + 1).ToString(CultureInfo.InvariantCulture)
                 : "Unknown";
             var slices = screen.Descendants().Where(element => element.Name.LocalName == "DmxSlice");
 
             foreach (var slice in slices)
             {
-                var sliceName = ParameterValue(slice, "Name") ?? $"Slice {entries.Count + 1}";
+                var sliceName = GetFixtureName(ParameterValue(slice, "Name"), entries.Count + 1);
                 var startText = FindGroupValue(slice, "Input", "Start Channel");
                 var start = ParsePositiveInteger(startText);
                 var channelCount = GetChannelCount(slice);
@@ -60,6 +65,17 @@ public static class AdvancedOutputXmlParser
         return entries;
     }
 
+    private static string GetFixtureName(string? name, int fallbackIndex)
+    {
+        var trimmedName = name?.Trim();
+        if (string.IsNullOrEmpty(trimmedName))
+        {
+            return $"Slice {fallbackIndex}";
+        }
+
+        return LeadingChannelRange.Replace(trimmedName, string.Empty).Trim();
+    }
+
     private static string GetNodeIP(string? target, string? configuredLumiverseName, string? screenElementName)
     {
         var parts = target?.Split((char[]?)null, StringSplitOptions.TrimEntries | StringSplitOptions.RemoveEmptyEntries) ?? [];
@@ -72,7 +88,7 @@ public static class AdvancedOutputXmlParser
             }
         }
 
-        if (parts.Length >= 2 && parts[0] == "TT_IP" &&
+        if (parts.Length >= 2 && (parts[0] is "TT_IP" or "TT_NODE") &&
             uint.TryParse(parts[^1], NumberStyles.Integer, CultureInfo.InvariantCulture, out var packed))
         {
             var addressBytes = new byte[sizeof(uint)];
