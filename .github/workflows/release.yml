@@ -29,7 +29,7 @@ jobs:
           [xml]$project = Get-Content "./Cr34teLightPatchBuilder/Cr34teLightPatchBuilder.csproj"
           $version = $project.Project.PropertyGroup.Version | Select-Object -First 1
           if ($version -notmatch '^\d+\.\d+\.\d+$') {
-            throw "The application version must be numeric (for example 1.0.4); found '$version'."
+            throw "The application version must be numeric (for example 1.0.5); found '$version'."
           }
 
           $tag = "v$version"
@@ -65,5 +65,5 @@ jobs:
           gh release create $tag `
             "./artifacts/installer/CR34TE-Light-Patch-Builder-Setup.msi" `
             --title "CR34TE Light Patch Builder $version" `
-            --notes "Fixed a naming bug: the installed app, project files, executable, and Start Menu shortcut now use consistent CR34TE Light Patch Builder names." `
+            --notes "Fixed Art-Net node IP and Node Port Address calculations, and cleaned channel-range prefixes from fixture names while retaining useful model numbers." `
             --target $env:GITHUB_SHA

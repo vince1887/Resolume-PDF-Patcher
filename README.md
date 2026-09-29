@@ -31,7 +31,7 @@ This publishes a self-contained Windows x64 application and builds the MSI. Outp
 To build a specific installer version:
 
 ```powershell
-.\build.ps1 -Version 1.0.4
+.\build.ps1 -Version 1.0.5
 ```
 
 ## Publish an update

@@ -1,5 +1,5 @@
 param(
-    [string]$Version = "1.0.4"
+    [string]$Version = "1.0.5"
 )
 
 $ErrorActionPreference = "Stop"
@@ -9,7 +9,7 @@ $publishDirectory = Join-Path $PSScriptRoot "artifacts\publish"
 $installerDirectory = Join-Path $PSScriptRoot "artifacts\installer"
 
 if ($Version -notmatch '^\d+\.\d+\.\d+$') {
-    throw "Version must be numeric, for example 1.0.2."
+    throw "Version must be numeric, for example 1.0.5."
 }
 
 New-Item -ItemType Directory -Force -Path $installerDirectory | Out-Null
