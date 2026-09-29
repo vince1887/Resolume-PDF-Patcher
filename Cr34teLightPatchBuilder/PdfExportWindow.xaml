@@ -48,6 +48,8 @@
           <CheckBox x:Name="StartAddressInput" Content="Start address" />
           <CheckBox x:Name="ChannelsInput" Content="Channels" />
           <CheckBox x:Name="EndAddressInput" Content="End address" />
+          <CheckBox x:Name="PositionInput" Content="Fixture position" />
+          <CheckBox x:Name="AngleInput" Content="Fixture angle" />
           <CheckBox x:Name="PixelsInput" Content="Pixel dimensions" />
           <CheckBox x:Name="ColorFormatInput" Content="Color format" />
           <CheckBox x:Name="FixtureIdInput" Content="Fixture ID" />

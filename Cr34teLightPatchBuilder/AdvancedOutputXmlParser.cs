@@ -44,6 +44,7 @@ public static class AdvancedOutputXmlParser
                 var channelCount = GetChannelCount(slice, rawSliceName);
                 var end = start.HasValue && channelCount.HasValue ? start.Value + channelCount.Value - 1 : (int?)null;
                 var pixelData = GetPixelData(slice);
+                var fixtureLayout = GetFixtureLayout(slice);
 
                 entries.Add(new PatchEntry(
                     entries.Count + 1,
@@ -59,7 +60,11 @@ public static class AdvancedOutputXmlParser
                     pixelData.Width,
                     pixelData.Height,
                     pixelData.ColorFormat,
-                    pixelData.Distribution));
+                    pixelData.Distribution,
+                    fixtureLayout.PositionX,
+                    fixtureLayout.PositionY,
+                    fixtureLayout.AngleDegrees,
+                    fixtureLayout.Corners));
             }
         }
 
@@ -149,6 +154,39 @@ public static class AdvancedOutputXmlParser
 
         return (width, height, components, format, NestedParameterValue(pixels, "Distribution") ?? "Unknown");
     }
+
+    private static (double? PositionX, double? PositionY, double? AngleDegrees, IReadOnlyList<FixturePoint> Corners) GetFixtureLayout(XElement slice)
+    {
+        var inputRect = slice.Descendants().FirstOrDefault(element => element.Name.LocalName == "InputRect");
+        if (inputRect is null)
+        {
+            return (null, null, null, []);
+        }
+
+        var corners = inputRect.Descendants()
+            .Where(element => element.Name.LocalName == "v")
+            .Select(element => (
+                X: ParseFiniteDouble(Attribute(element, "x")),
+                Y: ParseFiniteDouble(Attribute(element, "y"))))
+            .Where(point => point.X.HasValue && point.Y.HasValue)
+            .Select(point => new FixturePoint(point.X!.Value, point.Y!.Value))
+            .Take(4)
+            .ToArray();
+
+        double? positionX = corners.Length == 4 ? corners.Average(point => point.X) : null;
+        double? positionY = corners.Length == 4 ? corners.Average(point => point.Y) : null;
+        var orientation = ParseFiniteDouble(Attribute(inputRect, "orientation"));
+        double? angleDegrees = orientation.HasValue
+            ? (orientation.Value * 180d / Math.PI % 360d + 360d) % 360d
+            : null;
+
+        return (positionX, positionY, angleDegrees, corners);
+    }
+
+    private static double? ParseFiniteDouble(string? value) =>
+        double.TryParse(value, NumberStyles.Float, CultureInfo.InvariantCulture, out var parsed) && double.IsFinite(parsed)
+            ? parsed
+            : null;
 
     private static string? NestedParameterValue(XElement parent, string name) =>
         parent.Descendants()

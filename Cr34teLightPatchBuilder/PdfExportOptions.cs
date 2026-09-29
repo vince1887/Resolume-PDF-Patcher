@@ -18,6 +18,8 @@ public sealed class PdfExportOptions
     public bool ShowStartAddress { get; set; } = true;
     public bool ShowChannels { get; set; } = true;
     public bool ShowEndAddress { get; set; } = true;
+    public bool ShowPosition { get; set; } = true;
+    public bool ShowAngle { get; set; } = true;
     public bool ShowPixels { get; set; } = true;
     public bool ShowColorFormat { get; set; } = true;
     public bool ShowFixtureId { get; set; } = true;

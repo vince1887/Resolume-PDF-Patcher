@@ -88,10 +88,11 @@ public partial class MainWindow : Window
 
         _sourcePath = dialog.FileName;
         SourcePathText.Text = _sourcePath;
+        _entries = [];
         ConvertButton.IsEnabled = true;
-        SaveCsvButton.IsEnabled = false;
         SavePdfButton.IsEnabled = false;
         SavePixelMapButton.IsEnabled = false;
+        AutoFillIdsButton.IsEnabled = false;
         PatchGrid.ItemsSource = null;
         SummaryText.Text = "Ready to analyze";
         FixtureMetric.Text = "--";
@@ -125,11 +126,9 @@ public partial class MainWindow : Window
             StatusText.Text = _entries.Count == 0
                 ? "No DMX slices found in this XML"
                 : "Analysis complete. Review addresses and pixel order before exporting.";
-            SaveCsvButton.IsEnabled = _entries.Count > 0;
             SavePdfButton.IsEnabled = _entries.Count > 0;
-            SavePixelMapButton.IsEnabled = _entries.Any(entry =>
-                entry.PixelWidth.HasValue && entry.PixelHeight.HasValue &&
-                int.TryParse(entry.Address, out _) && entry.ColorFormat != "Unknown");
+            SavePixelMapButton.IsEnabled = _entries.Any(entry => entry.LayoutCorners.Count == 4);
+            AutoFillIdsButton.IsEnabled = _entries.Count > 0;
         }
         catch (Exception exception) when (exception is IOException or System.Xml.XmlException or UnauthorizedAccessException)
         {
@@ -138,16 +137,10 @@ public partial class MainWindow : Window
         }
     }
 
-    private void SaveCsvButton_Click(object sender, RoutedEventArgs e)
-    {
-        CommitFixtureIdEdit();
-        SavePatch("csv");
-    }
-
     private void SavePdfButton_Click(object sender, RoutedEventArgs e)
     {
         CommitFixtureIdEdit();
-        SavePatch("pdf");
+        SavePatch();
     }
 
     private void SavePixelMapButton_Click(object sender, RoutedEventArgs e)
@@ -160,9 +153,9 @@ public partial class MainWindow : Window
 
         var dialog = new SaveFileDialog
         {
-            Title = "Save per-pixel DMX map",
-            Filter = "CSV pixel map (*.csv)|*.csv",
-            FileName = $"{Path.GetFileNameWithoutExtension(_sourcePath)}_pixel_map.csv",
+            Title = "Save XML pixel map as SVG",
+            Filter = "SVG pixel map (*.svg)|*.svg",
+            FileName = $"{Path.GetFileNameWithoutExtension(_sourcePath)}_pixel_map.svg",
             AddExtension = true,
             OverwritePrompt = true
         };
@@ -174,14 +167,24 @@ public partial class MainWindow : Window
 
         try
         {
-            PatchExporter.SavePixelMapCsv(dialog.FileName, _entries);
+            PatchExporter.SavePixelMapSvg(dialog.FileName, _entries);
             StatusText.Text = $"Saved pixel map {Path.GetFileName(dialog.FileName)}";
         }
-        catch (Exception exception) when (exception is IOException or UnauthorizedAccessException)
+        catch (Exception exception) when (exception is IOException or UnauthorizedAccessException or InvalidOperationException)
         {
-            MessageBox.Show(this, exception.Message, "Could not save pixel map", MessageBoxButton.OK, MessageBoxImage.Error);
+            MessageBox.Show(this, exception.Message, "Could not save pixel map SVG", MessageBoxButton.OK, MessageBoxImage.Error);
             StatusText.Text = "Pixel map save failed";
         }
+    }
+
+    private void AutoFillIdsButton_Click(object sender, RoutedEventArgs e)
+    {
+        CommitFixtureIdEdit();
+        var filled = FixtureIdGenerator.FillMissing(_entries);
+        PatchGrid.Items.Refresh();
+        StatusText.Text = filled == 0
+            ? "All fixtures already have IDs"
+            : $"Auto-filled {filled} blank fixture ID{(filled == 1 ? string.Empty : "s")}";
     }
 
     private void CommitFixtureIdEdit()
@@ -190,29 +193,25 @@ public partial class MainWindow : Window
         PatchGrid.CommitEdit(System.Windows.Controls.DataGridEditingUnit.Row, true);
     }
 
-    private void SavePatch(string format)
+    private void SavePatch()
     {
         if (_sourcePath is null || _entries.Count == 0)
         {
             return;
         }
 
-        if (format == "pdf")
+        var customizeDialog = new PdfExportWindow(_pdfOptions) { Owner = this };
+        if (customizeDialog.ShowDialog() != true)
         {
-            var customizeDialog = new PdfExportWindow(_pdfOptions) { Owner = this };
-            if (customizeDialog.ShowDialog() != true)
-            {
-                return;
-            }
-
-            _pdfOptions = customizeDialog.Options;
+            return;
         }
 
+        _pdfOptions = customizeDialog.Options;
         var dialog = new SaveFileDialog
         {
-            Title = $"Save patch as {format.ToUpperInvariant()}",
-            Filter = format == "pdf" ? "PDF document (*.pdf)|*.pdf" : "CSV file (*.csv)|*.csv",
-            FileName = $"{Path.GetFileNameWithoutExtension(_sourcePath)}_patch.{format}",
+            Title = "Save patch as PDF",
+            Filter = "PDF document (*.pdf)|*.pdf",
+            FileName = $"{Path.GetFileNameWithoutExtension(_sourcePath)}_patch.pdf",
             AddExtension = true,
             OverwritePrompt = true
         };
@@ -224,15 +223,7 @@ public partial class MainWindow : Window
 
         try
         {
-            if (format == "pdf")
-            {
-                PatchExporter.SavePdf(dialog.FileName, _entries, Path.GetFileName(_sourcePath), _pdfOptions);
-            }
-            else
-            {
-                PatchExporter.SaveCsv(dialog.FileName, _entries, Path.GetFileName(_sourcePath));
-            }
-
+            PatchExporter.SavePdf(dialog.FileName, _entries, Path.GetFileName(_sourcePath), _pdfOptions);
             StatusText.Text = $"Saved {Path.GetFileName(dialog.FileName)}";
         }
         catch (Exception exception) when (exception is IOException or UnauthorizedAccessException or InvalidOperationException)

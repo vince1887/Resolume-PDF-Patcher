@@ -1,3 +1,5 @@
+using System.Globalization;
+
 namespace Cr34teLightPatchBuilder;
 
 public sealed record PatchEntry(
@@ -14,7 +16,11 @@ public sealed record PatchEntry(
     int? PixelWidth,
     int? PixelHeight,
     string ColorFormat,
-    string Distribution)
+    string Distribution,
+    double? PositionX,
+    double? PositionY,
+    double? AngleDegrees,
+    IReadOnlyList<FixturePoint> LayoutCorners)
 {
     public string FixtureId { get; set; } = string.Empty;
     public string LumiverseGroup => string.IsNullOrWhiteSpace(NodeIP) || LumiverseName == NodeIP
@@ -22,4 +28,12 @@ public sealed record PatchEntry(
         : $"{LumiverseName}  |  {NodeIP}";
     public string ArtNetPortGroup => $"Node Port Address {ArtNetPort}  |  Subnet {Subnet}  |  Universe {Universe}";
     public string PixelSize => PixelWidth.HasValue && PixelHeight.HasValue ? $"{PixelWidth} x {PixelHeight}" : "Unknown";
+    public string Position => PositionX.HasValue && PositionY.HasValue
+        ? $"{PositionX.Value.ToString("0.##", CultureInfo.InvariantCulture)}, {PositionY.Value.ToString("0.##", CultureInfo.InvariantCulture)}"
+        : "Unknown";
+    public string Angle => AngleDegrees.HasValue
+        ? $"{AngleDegrees.Value.ToString("0.##", CultureInfo.InvariantCulture)}°"
+        : "Unknown";
 }
+
+public readonly record struct FixturePoint(double X, double Y);

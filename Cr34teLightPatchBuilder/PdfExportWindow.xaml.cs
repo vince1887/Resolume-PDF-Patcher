@@ -32,6 +32,8 @@ public partial class PdfExportWindow : Window
         StartAddressInput.IsChecked = Options.ShowStartAddress;
         ChannelsInput.IsChecked = Options.ShowChannels;
         EndAddressInput.IsChecked = Options.ShowEndAddress;
+        PositionInput.IsChecked = Options.ShowPosition;
+        AngleInput.IsChecked = Options.ShowAngle;
         PixelsInput.IsChecked = Options.ShowPixels;
         ColorFormatInput.IsChecked = Options.ShowColorFormat;
         FixtureIdInput.IsChecked = Options.ShowFixtureId;
@@ -52,7 +54,7 @@ public partial class PdfExportWindow : Window
         var selectedColumns = new[]
         {
             FixtureInput.IsChecked, NodeIPInput.IsChecked, UniverseInput.IsChecked, StartAddressInput.IsChecked,
-            ChannelsInput.IsChecked, EndAddressInput.IsChecked, PixelsInput.IsChecked,
+            ChannelsInput.IsChecked, EndAddressInput.IsChecked, PositionInput.IsChecked, AngleInput.IsChecked, PixelsInput.IsChecked,
             ColorFormatInput.IsChecked, FixtureIdInput.IsChecked
         };
         if (!selectedColumns.Any(isSelected => isSelected == true))
@@ -85,6 +87,8 @@ public partial class PdfExportWindow : Window
         Options.ShowStartAddress = StartAddressInput.IsChecked == true;
         Options.ShowChannels = ChannelsInput.IsChecked == true;
         Options.ShowEndAddress = EndAddressInput.IsChecked == true;
+        Options.ShowPosition = PositionInput.IsChecked == true;
+        Options.ShowAngle = AngleInput.IsChecked == true;
         Options.ShowPixels = PixelsInput.IsChecked == true;
         Options.ShowColorFormat = ColorFormatInput.IsChecked == true;
         Options.ShowFixtureId = FixtureIdInput.IsChecked == true;
