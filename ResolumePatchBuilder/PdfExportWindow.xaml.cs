@@ -28,6 +28,7 @@ public partial class PdfExportWindow : Window
         ShowLumiverseInput.IsChecked = Options.ShowLumiverseGroups;
         ShowArtNetInput.IsChecked = Options.ShowArtNetGroups;
         FixtureInput.IsChecked = Options.ShowFixture;
+        NodeIPInput.IsChecked = Options.ShowNodeIP;
         UniverseInput.IsChecked = Options.ShowUniverse;
         StartAddressInput.IsChecked = Options.ShowStartAddress;
         ChannelsInput.IsChecked = Options.ShowChannels;
@@ -51,7 +52,7 @@ public partial class PdfExportWindow : Window
     {
         var selectedColumns = new[]
         {
-            FixtureInput.IsChecked, UniverseInput.IsChecked, StartAddressInput.IsChecked,
+            FixtureInput.IsChecked, NodeIPInput.IsChecked, UniverseInput.IsChecked, StartAddressInput.IsChecked,
             ChannelsInput.IsChecked, EndAddressInput.IsChecked, PixelsInput.IsChecked,
             ColorFormatInput.IsChecked, FixtureIdInput.IsChecked
         };
@@ -81,6 +82,7 @@ public partial class PdfExportWindow : Window
         Options.ShowLumiverseGroups = ShowLumiverseInput.IsChecked == true;
         Options.ShowArtNetGroups = ShowArtNetInput.IsChecked == true;
         Options.ShowFixture = FixtureInput.IsChecked == true;
+        Options.ShowNodeIP = NodeIPInput.IsChecked == true;
         Options.ShowUniverse = UniverseInput.IsChecked == true;
         Options.ShowStartAddress = StartAddressInput.IsChecked == true;
         Options.ShowChannels = ChannelsInput.IsChecked == true;

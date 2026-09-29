@@ -72,7 +72,8 @@ public static class ResolumeXmlParser
             }
         }
 
-        if (parts.Length >= 3 && uint.TryParse(parts[^1], NumberStyles.Integer, CultureInfo.InvariantCulture, out var packed))
+        if (parts.Length >= 2 && parts[0] == "TT_IP" &&
+            uint.TryParse(parts[^1], NumberStyles.Integer, CultureInfo.InvariantCulture, out var packed))
         {
             var addressBytes = new byte[sizeof(uint)];
             BinaryPrimitives.WriteUInt32LittleEndian(addressBytes, packed);

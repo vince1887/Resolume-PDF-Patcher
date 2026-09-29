@@ -44,6 +44,7 @@
         <TextBlock Text="Table columns" Foreground="{StaticResource MutedBrush}" Margin="0,4,0,8" />
         <UniformGrid Columns="3">
           <CheckBox x:Name="FixtureInput" Content="Fixture" />
+          <CheckBox x:Name="NodeIPInput" Content="Node IP / target" />
           <CheckBox x:Name="UniverseInput" Content="Universe" />
           <CheckBox x:Name="StartAddressInput" Content="Start address" />
           <CheckBox x:Name="ChannelsInput" Content="Channels" />

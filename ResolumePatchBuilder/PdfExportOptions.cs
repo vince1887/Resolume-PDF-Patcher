@@ -14,6 +14,7 @@ public sealed class PdfExportOptions
     public bool ShowLumiverseGroups { get; set; } = true;
     public bool ShowArtNetGroups { get; set; } = true;
     public bool ShowFixture { get; set; } = true;
+    public bool ShowNodeIP { get; set; } = true;
     public bool ShowUniverse { get; set; } = true;
     public bool ShowStartAddress { get; set; } = true;
     public bool ShowChannels { get; set; } = true;

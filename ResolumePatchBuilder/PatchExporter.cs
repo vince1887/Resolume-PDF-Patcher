@@ -213,6 +213,7 @@ public static class PatchExporter
     {
         var columns = new List<(string Header, Func<PatchEntry, string> Value, double WidthUnits)>();
         if (options.ShowFixture) columns.Add(("Fixture", entry => entry.Name, 3.2));
+        if (options.ShowNodeIP) columns.Add(("Node IP", entry => entry.NodeIP, 1.5));
         if (options.ShowUniverse) columns.Add(("Universe", entry => entry.Universe, 1.1));
         if (options.ShowStartAddress) columns.Add(("Start address", entry => entry.Address, 1.4));
         if (options.ShowChannels) columns.Add(("Channels", entry => entry.Channels, 1.1));
