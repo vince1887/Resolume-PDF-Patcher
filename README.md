@@ -36,14 +36,9 @@ To build a specific installer version:
 
 ## Publish an update
 
-Update the application version in `ResolumePatchBuilder\ResolumePatchBuilder.csproj`, commit and push your changes, then push a matching version tag:
+Update the application version in `ResolumePatchBuilder\ResolumePatchBuilder.csproj`, commit the changes, and click **Push origin** in GitHub Desktop.
 
-```powershell
-git tag v1.0.3
-git push origin v1.0.3
-```
-
-The `Build and publish installer` GitHub Actions workflow builds the app and MSI, then attaches the installer and generated notes to a GitHub Release. Existing installed copies detect that release on their next launch and offer the update.
+The `Build and publish installer` GitHub Actions workflow checks whether that version has already been released. If not, it builds the app and MSI, creates the matching `v<version>` tag and GitHub Release, and attaches the installer with generated notes. No separate tag push is needed. Existing installed copies detect that release on their next launch and offer the update.
 
 ## Project layout
 
