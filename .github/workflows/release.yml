@@ -65,5 +65,5 @@ jobs:
           gh release create $tag `
             "./artifacts/installer/CR34TE-Light-Patch-Builder-Setup.msi" `
             --title "CR34TE Light Patch Builder $version" `
-            --notes "Improved fixture channel-count detection, including RGBWA and single-channel luminance formats, explicit channel ranges, and fixtures with slider channels. Added PDF node and fixture summaries, wrapped long table values with auto-height rows, and improved PDF export settings." `
+            --notes "Added XML-based pixel-map SVG export with fixture IDs, layout positions, orientation arrows, DMX details, and a highlighted first pixel. Added automatic fill for blank fixture IDs and position/angle data to the patch. Simplified export actions to Save PDF and Save Pixel Map." `
             --target $env:GITHUB_SHA
