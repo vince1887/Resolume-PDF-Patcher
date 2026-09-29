@@ -4,7 +4,7 @@ using System.Text;
 using PdfSharp.Drawing;
 using PdfSharp.Pdf;
 
-namespace ResolumePatchBuilder;
+namespace Cr34teLightPatchBuilder;
 
 public static class PatchExporter
 {

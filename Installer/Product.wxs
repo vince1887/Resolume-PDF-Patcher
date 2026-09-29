@@ -31,7 +31,7 @@
       <Component Id="StartMenuShortcut" Guid="A8A93956-3AFB-44E7-8D93-1F0392F27B06">
         <Shortcut Id="LaunchPatchBuilder"
                   Name="CR34TE Light Patch Builder"
-                  Target="[INSTALLFOLDER]ResolumePatchBuilder.exe"
+                  Target="[INSTALLFOLDER]Cr34teLightPatchBuilder.exe"
                   WorkingDirectory="INSTALLFOLDER" />
         <RemoveFolder Id="RemoveStartMenuFolder" On="uninstall" />
         <RegistryValue Root="HKCU"

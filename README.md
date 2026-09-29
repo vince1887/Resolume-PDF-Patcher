@@ -31,12 +31,12 @@ This publishes a self-contained Windows x64 application and builds the MSI. Outp
 To build a specific installer version:
 
 ```powershell
-.\build.ps1 -Version 1.0.3
+.\build.ps1 -Version 1.0.4
 ```
 
 ## Publish an update
 
-Update the application version in `ResolumePatchBuilder\ResolumePatchBuilder.csproj`, commit the changes, and click **Push origin** in GitHub Desktop.
+Update the application version in `Cr34teLightPatchBuilder\Cr34teLightPatchBuilder.csproj`, commit the changes, and click **Push origin** in GitHub Desktop.
 
 The `Build and publish installer` GitHub Actions workflow checks whether that version has already been released. If not, it builds the app and MSI, creates the matching `v<version>` tag and GitHub Release, and attaches the installer with generated notes. No separate tag push is needed. Existing installed copies detect that release on their next launch and offer the update.
 
@@ -46,10 +46,10 @@ The `Build and publish installer` GitHub Actions workflow checks whether that ve
 .
 ├── .github/workflows/release.yml     # Tagged-release build and publication
 ├── Installer/                        # WiX MSI installer source
-├── ResolumePatchBuilder/             # WPF app source and Resources/ app icon
+├── Cr34teLightPatchBuilder/          # WPF app source and Resources/ app icon
 ├── artifacts/                        # Local build output (git-ignored)
 ├── build.ps1                         # Reproducible app + MSI build
 └── README.md                         # GitHub landing page and downloads
 ```
 
-See [`ResolumePatchBuilder/README.md`](ResolumePatchBuilder/README.md) for XML mapping and export details.
+See [`Cr34teLightPatchBuilder/README.md`](Cr34teLightPatchBuilder/README.md) for XML mapping and export details.

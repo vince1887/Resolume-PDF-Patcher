@@ -1,9 +1,9 @@
 param(
-    [string]$Version = "1.0.3"
+    [string]$Version = "1.0.4"
 )
 
 $ErrorActionPreference = "Stop"
-$appProject = Join-Path $PSScriptRoot "ResolumePatchBuilder\ResolumePatchBuilder.csproj"
+$appProject = Join-Path $PSScriptRoot "Cr34teLightPatchBuilder\Cr34teLightPatchBuilder.csproj"
 $installerProject = Join-Path $PSScriptRoot "Installer\PatchBuilderInstaller.wixproj"
 $publishDirectory = Join-Path $PSScriptRoot "artifacts\publish"
 $installerDirectory = Join-Path $PSScriptRoot "artifacts\installer"
@@ -12,7 +12,11 @@ if ($Version -notmatch '^\d+\.\d+\.\d+$') {
     throw "Version must be numeric, for example 1.0.2."
 }
 
-New-Item -ItemType Directory -Force -Path $publishDirectory, $installerDirectory | Out-Null
+New-Item -ItemType Directory -Force -Path $installerDirectory | Out-Null
+if (Test-Path -LiteralPath $publishDirectory) {
+    Remove-Item -LiteralPath $publishDirectory -Recurse -Force
+}
+New-Item -ItemType Directory -Force -Path $publishDirectory | Out-Null
 
 dotnet publish $appProject -c Release -r win-x64 --self-contained true `
     -p:PublishSingleFile=true `

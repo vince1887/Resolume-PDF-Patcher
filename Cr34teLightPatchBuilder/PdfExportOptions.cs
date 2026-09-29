@@ -1,4 +1,4 @@
-namespace ResolumePatchBuilder;
+namespace Cr34teLightPatchBuilder;
 
 public sealed class PdfExportOptions
 {

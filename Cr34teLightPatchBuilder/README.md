@@ -4,10 +4,10 @@ A Windows desktop utility that reads Resolume Arena Advanced Output XML and crea
 
 ## Run
 
-Open `ResolumePatchBuilder.csproj` in Visual Studio or VS Code with the .NET 8 SDK and Windows Desktop runtime, then run the project. To build a Windows executable:
+Open `Cr34teLightPatchBuilder.csproj` in Visual Studio or VS Code with the .NET 8 SDK and Windows Desktop runtime, then run the project. To build a Windows executable:
 
 ```powershell
-dotnet publish .\ResolumePatchBuilder.csproj -c Release -r win-x64 --self-contained true /p:PublishSingleFile=true
+dotnet publish .\Cr34teLightPatchBuilder.csproj -c Release -r win-x64 --self-contained true /p:PublishSingleFile=true
 ```
 
 The published executable is written under `bin\Release\net8.0-windows\win-x64\publish`.

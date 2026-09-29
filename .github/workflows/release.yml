@@ -26,15 +26,19 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          [xml]$project = Get-Content "./ResolumePatchBuilder/ResolumePatchBuilder.csproj"
+          [xml]$project = Get-Content "./Cr34teLightPatchBuilder/Cr34teLightPatchBuilder.csproj"
           $version = $project.Project.PropertyGroup.Version | Select-Object -First 1
           if ($version -notmatch '^\d+\.\d+\.\d+$') {
-            throw "The application version must be numeric (for example 1.0.3); found '$version'."
+            throw "The application version must be numeric (for example 1.0.4); found '$version'."
           }
 
           $tag = "v$version"
-          gh release view $tag --repo $env:GITHUB_REPOSITORY *> $null
-          if ($LASTEXITCODE -eq 0) {
+          $releasedTags = gh release list --repo $env:GITHUB_REPOSITORY --limit 100 --json tagName --jq '.[].tagName'
+          if ($LASTEXITCODE -ne 0) {
+            throw "Could not query GitHub Releases (exit code $LASTEXITCODE)."
+          }
+
+          if ($releasedTags -contains $tag) {
             Write-Host "Release $tag already exists; nothing to publish."
             "publish=false" >> $env:GITHUB_OUTPUT
             exit 0
@@ -61,5 +65,5 @@ jobs:
           gh release create $tag `
             "./artifacts/installer/CR34TE-Light-Patch-Builder-Setup.msi" `
             --title "CR34TE Light Patch Builder $version" `
-            --generate-notes `
+            --notes "Fixed a naming bug: the installed app, project files, executable, and Start Menu shortcut now use consistent CR34TE Light Patch Builder names." `
             --target $env:GITHUB_SHA

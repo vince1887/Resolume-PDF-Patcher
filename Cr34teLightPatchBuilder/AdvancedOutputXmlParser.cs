@@ -3,9 +3,9 @@ using System.Globalization;
 using System.Xml;
 using System.Xml.Linq;
 
-namespace ResolumePatchBuilder;
+namespace Cr34teLightPatchBuilder;
 
-public static class ResolumeXmlParser
+public static class AdvancedOutputXmlParser
 {
     public static IReadOnlyList<PatchEntry> Parse(string filePath)
     {

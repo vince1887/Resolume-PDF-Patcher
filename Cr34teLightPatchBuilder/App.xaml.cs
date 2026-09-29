@@ -1,6 +1,6 @@
 using System.Windows;
 
-namespace ResolumePatchBuilder;
+namespace Cr34teLightPatchBuilder;
 
 public partial class App : Application
 {

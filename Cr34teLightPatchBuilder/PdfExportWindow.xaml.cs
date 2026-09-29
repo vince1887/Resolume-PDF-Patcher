@@ -1,7 +1,7 @@
 using System.Windows;
 using System.Windows.Controls;
 
-namespace ResolumePatchBuilder;
+namespace Cr34teLightPatchBuilder;
 
 public partial class PdfExportWindow : Window
 {

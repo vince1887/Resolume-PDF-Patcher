@@ -4,7 +4,7 @@ using System.Net.Http;
 using System.Windows;
 using System.Windows.Data;
 
-namespace ResolumePatchBuilder;
+namespace Cr34teLightPatchBuilder;
 
 public partial class MainWindow : Window
 {
@@ -76,7 +76,7 @@ public partial class MainWindow : Window
     {
         var dialog = new OpenFileDialog
         {
-            Title = "Choose Resolume Advanced Output XML",
+            Title = "Choose Advanced Output XML",
             Filter = "XML files (*.xml)|*.xml|All files (*.*)|*.*",
             CheckFileExists = true
         };
@@ -109,7 +109,7 @@ public partial class MainWindow : Window
 
         try
         {
-            _entries = ResolumeXmlParser.Parse(_sourcePath);
+            _entries = AdvancedOutputXmlParser.Parse(_sourcePath);
             var view = CollectionViewSource.GetDefaultView(_entries);
             view.GroupDescriptions.Clear();
             view.GroupDescriptions.Add(new PropertyGroupDescription(nameof(PatchEntry.LumiverseGroup)));

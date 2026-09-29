@@ -5,7 +5,7 @@ using System.Reflection;
 using System.Text.Json;
 using Microsoft.Win32;
 
-namespace ResolumePatchBuilder;
+namespace Cr34teLightPatchBuilder;
 
 public sealed record AppRelease(Version Version, Uri InstallerUri);
 
