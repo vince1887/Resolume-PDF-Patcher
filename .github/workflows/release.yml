@@ -1,0 +1,38 @@
+name: Build and publish installer
+
+on:
+  push:
+    tags:
+      - "v*"
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: windows-latest
+    steps:
+      - name: Check out source
+        uses: actions/checkout@v4
+
+      - name: Set up .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 8.0.x
+
+      - name: Build application and installer
+        shell: pwsh
+        run: |
+          $version = $env:GITHUB_REF_NAME.TrimStart('v')
+          ./build.ps1 -Version $version
+
+      - name: Publish GitHub release
+        shell: pwsh
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          $version = $env:GITHUB_REF_NAME.TrimStart('v')
+          gh release create $env:GITHUB_REF_NAME `
+            "./artifacts/installer/CR34TE-Light-Patch-Builder-Setup.msi" `
+            --title "CR34TE Light Patch Builder $version" `
+            --generate-notes

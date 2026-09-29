@@ -1,5 +1,6 @@
 using Microsoft.Win32;
 using System.IO;
+using System.Net.Http;
 using System.Windows;
 using System.Windows.Data;
 
@@ -14,6 +15,61 @@ public partial class MainWindow : Window
     public MainWindow()
     {
         InitializeComponent();
+        ContentRendered += MainWindow_ContentRendered;
+    }
+
+    private async void MainWindow_ContentRendered(object? sender, EventArgs e)
+    {
+        ContentRendered -= MainWindow_ContentRendered;
+        if (!AppUpdateService.IsInstalledByMsi())
+        {
+            return;
+        }
+
+        AppRelease? release;
+        try
+        {
+            release = await AppUpdateService.GetNewerReleaseAsync();
+        }
+        catch (Exception exception) when (exception is HttpRequestException or TaskCanceledException or IOException or InvalidDataException)
+        {
+            System.Diagnostics.Trace.TraceWarning($"Could not check for application updates: {exception}");
+            return;
+        }
+
+        if (release is null)
+        {
+            return;
+        }
+
+        var result = MessageBox.Show(
+            this,
+            $"Version {release.Version} is available. Would you like to download and install it now?",
+            "CR34TE Light Patch Builder update",
+            MessageBoxButton.YesNo,
+            MessageBoxImage.Information);
+        if (result != MessageBoxResult.Yes)
+        {
+            return;
+        }
+
+        try
+        {
+            StatusText.Text = $"Downloading version {release.Version}...";
+            var installerPath = await AppUpdateService.DownloadInstallerAsync(release);
+            AppUpdateService.LaunchInstaller(installerPath);
+            Application.Current.Shutdown();
+        }
+        catch (Exception exception) when (exception is HttpRequestException or TaskCanceledException or IOException or InvalidDataException or System.ComponentModel.Win32Exception or UnauthorizedAccessException)
+        {
+            System.Diagnostics.Trace.TraceError($"Update download/install failed: {exception}");
+            MessageBox.Show(
+                this,
+                $"The update could not be started. You can download the latest installer from GitHub Releases.\n\n{exception.Message}",
+                "Update unavailable",
+                MessageBoxButton.OK,
+                MessageBoxImage.Warning);
+        }
     }
 
     private void BrowseButton_Click(object sender, RoutedEventArgs e)
