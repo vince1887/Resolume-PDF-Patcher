@@ -3,7 +3,7 @@
     <OutputType>Package</OutputType>
     <OutputName>CR34TE-Light-Patch-Builder-Setup</OutputName>
     <InstallerPlatform>x64</InstallerPlatform>
-    <ProductVersion Condition="'$(ProductVersion)' == ''">1.0.2</ProductVersion>
+    <ProductVersion Condition="'$(ProductVersion)' == ''">1.0.3</ProductVersion>
     <AppPublishDir Condition="'$(AppPublishDir)' == ''">$(MSBuildProjectDirectory)\..\artifacts\publish</AppPublishDir>
     <DefineConstants>AppPublishDir=$(AppPublishDir);ProductVersion=$(ProductVersion)</DefineConstants>
   </PropertyGroup>

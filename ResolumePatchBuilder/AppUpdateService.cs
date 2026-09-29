@@ -38,8 +38,9 @@ public static class AppUpdateService
             throw new InvalidDataException("The latest GitHub release does not have a valid version tag.");
         }
 
-        var currentVersion = Assembly.GetEntryAssembly()?.GetName().Version
+        var assemblyVersion = Assembly.GetEntryAssembly()?.GetName().Version
             ?? throw new InvalidDataException("The installed application version could not be determined.");
+        var currentVersion = new Version(assemblyVersion.Major, assemblyVersion.Minor, Math.Max(assemblyVersion.Build, 0));
         if (latestVersion <= currentVersion)
         {
             return null;

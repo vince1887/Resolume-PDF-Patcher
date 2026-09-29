@@ -51,7 +51,7 @@ The `Build and publish installer` GitHub Actions workflow builds the app and MSI
 .
 ├── .github/workflows/release.yml     # Tagged-release build and publication
 ├── Installer/                        # WiX MSI installer source
-├── ResolumePatchBuilder/             # WPF application source
+├── ResolumePatchBuilder/             # WPF app source and Resources/ app icon
 ├── artifacts/                        # Local build output (git-ignored)
 ├── build.ps1                         # Reproducible app + MSI build
 └── README.md                         # GitHub landing page and downloads

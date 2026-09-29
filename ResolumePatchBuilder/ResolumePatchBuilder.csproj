@@ -5,8 +5,12 @@
     <UseWPF>true</UseWPF>
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
-    <Version>1.0.2</Version>
+    <Version>1.0.3</Version>
+    <ApplicationIcon>Resources\CR34TE-Light-Patch-Builder.ico</ApplicationIcon>
   </PropertyGroup>
+  <ItemGroup>
+    <Resource Include="Resources\CR34TE-Light-Patch-Builder.ico" />
+  </ItemGroup>
   <ItemGroup>
     <PackageReference Include="PDFsharp-WPF" Version="6.2.2" />
   </ItemGroup>
