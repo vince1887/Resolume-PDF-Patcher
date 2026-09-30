@@ -25,8 +25,6 @@ From this repository's root:
 
 This publishes a self-contained Windows x64 application and builds the MSI. Outputs go under the ignored `artifacts\` folder:
 
-- `artifacts\publish\` — app files bundled into the installer
-- `artifacts\installer\CR34TE-Light-Patch-Builder-Setup.msi` — installable app
 
 To build a specific installer version:
 

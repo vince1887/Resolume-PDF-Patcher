@@ -65,5 +65,5 @@ jobs:
           gh release create $tag `
             "./artifacts/installer/CR34TE-Light-Patch-Builder-Setup.msi" `
             --title "CR34TE Light Patch Builder $version" `
-            --notes "Added XML-based pixel-map SVG export with fixture IDs, layout positions, orientation arrows, DMX details, and a highlighted first pixel. Added automatic fill for blank fixture IDs and position/angle data to the patch. Simplified export actions to Save PDF and Save Pixel Map." `
+            --notes "Added a color picker for the PDF accent color while keeping direct hex entry. Added synchronized 0-100% progress dialogs for XML analysis and fixture ID auto-fill, including Lumiverse patch population." `
             --target $env:GITHUB_SHA

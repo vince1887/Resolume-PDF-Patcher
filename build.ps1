@@ -9,7 +9,7 @@ $publishDirectory = Join-Path $PSScriptRoot "artifacts\publish"
 $installerDirectory = Join-Path $PSScriptRoot "artifacts\installer"
 
 if ($Version -notmatch '^\d+\.\d+\.\d+$') {
-    throw "Version must be numeric, for example 1.0.5."
+     throw "Version must be numeric, for example 1.0.8."
 }
 
 New-Item -ItemType Directory -Force -Path $installerDirectory | Out-Null

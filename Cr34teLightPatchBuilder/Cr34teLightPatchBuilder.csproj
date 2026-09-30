@@ -6,7 +6,7 @@
     <UseWindowsForms>true</UseWindowsForms>
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
-    <Version>1.0.7</Version>
+      <Version>1.0.8</Version>
     <ApplicationIcon>Resources\CR34TE-Light-Patch-Builder.ico</ApplicationIcon>
   </PropertyGroup>
   <ItemGroup>
