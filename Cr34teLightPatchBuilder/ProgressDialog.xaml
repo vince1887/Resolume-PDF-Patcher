@@ -1,0 +1,23 @@
+<Window x:Class="Cr34teLightPatchBuilder.ProgressDialog"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="Working" Width="420" SizeToContent="Height" MinWidth="420" MinHeight="176"
+        WindowStartupLocation="CenterOwner" ResizeMode="NoResize" ShowInTaskbar="False"
+        Background="{StaticResource WindowBrush}" Foreground="#F0F0F0" FontFamily="Segoe UI">
+  <Grid Margin="24">
+    <Grid.RowDefinitions>
+      <RowDefinition Height="Auto" />
+      <RowDefinition Height="Auto" />
+      <RowDefinition Height="Auto" />
+    </Grid.RowDefinitions>
+    <StackPanel>
+      <TextBlock x:Name="OperationTitleText" FontSize="18" FontWeight="SemiBold" />
+      <TextBlock x:Name="OperationMessageText" Foreground="{StaticResource MutedBrush}" Margin="0,6,0,18" TextWrapping="Wrap" />
+    </StackPanel>
+    <ProgressBar x:Name="OperationProgressBar" Grid.Row="1" Height="8" Minimum="0" Maximum="100" Foreground="{StaticResource AccentBrush}" Background="{StaticResource LineBrush}" />
+    <DockPanel Grid.Row="2" Margin="0,10,0,0">
+      <TextBlock x:Name="OperationStatusText" Text="Working" Foreground="{StaticResource MutedBrush}" />
+      <TextBlock x:Name="ProgressPercentText" DockPanel.Dock="Right" Text="0%" FontWeight="SemiBold" />
+    </DockPanel>
+  </Grid>
+</Window>

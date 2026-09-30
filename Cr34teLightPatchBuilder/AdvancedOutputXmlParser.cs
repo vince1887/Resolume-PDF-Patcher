@@ -1,5 +1,6 @@
 using System.Buffers.Binary;
 using System.Globalization;
+using System.IO;
 using System.Text.RegularExpressions;
 using System.Xml;
 using System.Xml.Linq;
@@ -12,12 +13,36 @@ public static class AdvancedOutputXmlParser
         @"^\s*(?<start>\d+)\s*[-–—]\s*(?<end>\d+)\s+",
         RegexOptions.CultureInvariant | RegexOptions.Compiled);
 
-    public static IReadOnlyList<PatchEntry> Parse(string filePath)
+    public static IReadOnlyList<PatchEntry> Parse(string filePath, IProgress<int>? progress = null)
     {
+        var lastProgress = -1;
+        void ReportProgress(int value)
+        {
+            if (progress is null || value <= lastProgress)
+            {
+                return;
+            }
+
+            lastProgress = value;
+            progress.Report(value);
+        }
+
+        ReportProgress(0);
         var settings = new XmlReaderSettings { DtdProcessing = DtdProcessing.Prohibit, XmlResolver = null };
-        using var reader = XmlReader.Create(filePath, settings);
+        var fileLength = new FileInfo(filePath).Length;
+        using var stream = new ProgressReadStream(File.OpenRead(filePath), position =>
+        {
+            if (fileLength > 0)
+            {
+                ReportProgress((int)Math.Min(20, position * 20L / fileLength));
+            }
+        });
+        using var reader = XmlReader.Create(stream, settings);
         var document = XDocument.Load(reader);
+        ReportProgress(20);
         var entries = new List<PatchEntry>();
+        var totalSlices = document.Descendants().Count(element => element.Name.LocalName == "DmxSlice");
+        var processedSlices = 0;
 
         foreach (var screen in document.Descendants().Where(element => element.Name.LocalName == "DmxScreen"))
         {
@@ -65,10 +90,65 @@ public static class AdvancedOutputXmlParser
                     fixtureLayout.PositionY,
                     fixtureLayout.AngleDegrees,
                     fixtureLayout.Corners));
+
+                processedSlices++;
+                var parsingProgress = 20 + (int)(processedSlices * 80L / Math.Max(totalSlices, 1));
+                ReportProgress(Math.Min(99, parsingProgress));
             }
         }
 
+        ReportProgress(100);
         return entries;
+    }
+
+    private sealed class ProgressReadStream(Stream inner, Action<long> reportPosition) : Stream
+    {
+        public override bool CanRead => inner.CanRead;
+        public override bool CanSeek => inner.CanSeek;
+        public override bool CanWrite => false;
+        public override long Length => inner.Length;
+        public override long Position
+        {
+            get => inner.Position;
+            set => inner.Position = value;
+        }
+
+        public override void Flush() => inner.Flush();
+
+        public override int Read(byte[] buffer, int offset, int count)
+        {
+            var bytesRead = inner.Read(buffer, offset, count);
+            reportPosition(inner.Position);
+            return bytesRead;
+        }
+
+        public override int Read(Span<byte> buffer)
+        {
+            var bytesRead = inner.Read(buffer);
+            reportPosition(inner.Position);
+            return bytesRead;
+        }
+
+        public override int ReadByte()
+        {
+            var value = inner.ReadByte();
+            reportPosition(inner.Position);
+            return value;
+        }
+
+        public override long Seek(long offset, SeekOrigin origin) => inner.Seek(offset, origin);
+        public override void SetLength(long value) => throw new NotSupportedException();
+        public override void Write(byte[] buffer, int offset, int count) => throw new NotSupportedException();
+
+        protected override void Dispose(bool disposing)
+        {
+            if (disposing)
+            {
+                inner.Dispose();
+            }
+
+            base.Dispose(disposing);
+        }
     }
 
     private static string GetFixtureName(string? name, int fallbackIndex)

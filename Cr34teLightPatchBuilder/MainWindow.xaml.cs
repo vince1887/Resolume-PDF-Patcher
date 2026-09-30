@@ -107,32 +107,49 @@ public partial class MainWindow : Window
 
     private void ConvertButton_Click(object sender, RoutedEventArgs e)
     {
-        if (_sourcePath is null)
+        var sourcePath = _sourcePath;
+        if (sourcePath is null)
         {
             return;
         }
 
         try
         {
-            _entries = AdvancedOutputXmlParser.Parse(_sourcePath);
-            var view = CollectionViewSource.GetDefaultView(_entries);
-            view.GroupDescriptions.Clear();
-            view.GroupDescriptions.Add(new PropertyGroupDescription(nameof(PatchEntry.LumiverseGroup)));
-            view.GroupDescriptions.Add(new PropertyGroupDescription(nameof(PatchEntry.ArtNetPortGroup)));
-            PatchGrid.ItemsSource = view;
-            SummaryText.Text = $"{_entries.Count} fixtures  /  {_entries.Select(entry => entry.LumiverseGroup).Distinct().Count()} Lumiverses";
-            FixtureMetric.Text = _entries.Count.ToString("N0");
-            LumiverseMetric.Text = _entries.Select(entry => entry.LumiverseGroup).Distinct().Count().ToString("N0");
-            PixelMetric.Text = _entries
-                .Where(entry => entry.PixelWidth.HasValue && entry.PixelHeight.HasValue)
-                .Sum(entry => (long)entry.PixelWidth!.Value * entry.PixelHeight!.Value)
-                .ToString("N0");
-            StatusText.Text = _entries.Count == 0
-                ? "No DMX slices found in this XML"
-                : "Analysis complete. Review addresses and pixel order before exporting.";
-            SavePdfButton.IsEnabled = _entries.Count > 0;
-            SavePixelMapButton.IsEnabled = _entries.Any(entry => entry.LayoutCorners.Count == 4);
-            AutoFillIdsButton.IsEnabled = _entries.Count > 0;
+            ProgressDialog.RunWithProgress(
+                this,
+                "Analyzing XML",
+                "Reading the XML and analyzing fixtures...",
+                progress =>
+                {
+                    var entries = AdvancedOutputXmlParser.Parse(sourcePath, progress);
+                    var lumiverseCount = entries.Select(entry => entry.LumiverseGroup).Distinct().Count();
+                    var pixelCount = entries
+                        .Where(entry => entry.PixelWidth.HasValue && entry.PixelHeight.HasValue)
+                        .Sum(entry => (long)entry.PixelWidth!.Value * entry.PixelHeight!.Value);
+                    var hasPixelMap = entries.Any(entry => entry.LayoutCorners.Count == 4);
+                    return (Entries: entries, LumiverseCount: lumiverseCount, PixelCount: pixelCount, HasPixelMap: hasPixelMap);
+                },
+                analysis =>
+                {
+                    _entries = analysis.Entries;
+                    var view = CollectionViewSource.GetDefaultView(_entries);
+                    view.GroupDescriptions.Clear();
+                    view.GroupDescriptions.Add(new PropertyGroupDescription(nameof(PatchEntry.LumiverseGroup)));
+                    view.GroupDescriptions.Add(new PropertyGroupDescription(nameof(PatchEntry.ArtNetPortGroup)));
+                    PatchGrid.ItemsSource = view;
+                    SummaryText.Text = $"{_entries.Count} fixtures  /  {analysis.LumiverseCount} Lumiverses";
+                    FixtureMetric.Text = _entries.Count.ToString("N0");
+                    LumiverseMetric.Text = analysis.LumiverseCount.ToString("N0");
+                    PixelMetric.Text = analysis.PixelCount.ToString("N0");
+                    StatusText.Text = _entries.Count == 0
+                        ? "No DMX slices found in this XML"
+                        : "Analysis complete. Review addresses and pixel order before exporting.";
+                    SavePdfButton.IsEnabled = _entries.Count > 0;
+                    SavePixelMapButton.IsEnabled = analysis.HasPixelMap;
+                    AutoFillIdsButton.IsEnabled = _entries.Count > 0;
+                    PatchGrid.UpdateLayout();
+                },
+                "Populating the Lumiverse patch...");
         }
         catch (Exception exception) when (exception is IOException or System.Xml.XmlException or UnauthorizedAccessException)
         {
@@ -184,11 +201,28 @@ public partial class MainWindow : Window
     private void AutoFillIdsButton_Click(object sender, RoutedEventArgs e)
     {
         CommitFixtureIdEdit();
-        var filled = FixtureIdGenerator.FillMissing(_entries);
-        PatchGrid.Items.Refresh();
-        StatusText.Text = filled == 0
-            ? "All fixtures already have IDs"
-            : $"Auto-filled {filled} blank fixture ID{(filled == 1 ? string.Empty : "s")}";
+        try
+        {
+            ProgressDialog.RunWithProgress(
+                this,
+                "Auto-filling fixture IDs",
+                "Checking fixtures and assigning unused IDs...",
+                progress => FixtureIdGenerator.FillMissing(_entries, progress),
+                filled =>
+                {
+                    PatchGrid.Items.Refresh();
+                    PatchGrid.UpdateLayout();
+                    StatusText.Text = filled == 0
+                        ? "All fixtures already have IDs"
+                        : $"Auto-filled {filled} blank fixture ID{(filled == 1 ? string.Empty : "s")}";
+                },
+                "Refreshing fixture IDs in the patch...");
+        }
+        catch (InvalidOperationException exception)
+        {
+            MessageBox.Show(this, exception.Message, "Could not auto-fill fixture IDs", MessageBoxButton.OK, MessageBoxImage.Error);
+            StatusText.Text = "ID auto-fill failed";
+        }
     }
 
     private void CommitFixtureIdEdit()
