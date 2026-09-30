@@ -3,6 +3,10 @@ using System.IO;
 using System.Net.Http;
 using System.Windows;
 using System.Windows.Data;
+using Application = System.Windows.Application;
+using MessageBox = System.Windows.MessageBox;
+using OpenFileDialog = Microsoft.Win32.OpenFileDialog;
+using SaveFileDialog = Microsoft.Win32.SaveFileDialog;
 
 namespace Cr34teLightPatchBuilder;
 

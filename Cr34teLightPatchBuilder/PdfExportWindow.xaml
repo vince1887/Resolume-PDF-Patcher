@@ -31,7 +31,11 @@
           <StackPanel Grid.Column="2"><TextBlock Text="Orientation" Foreground="{StaticResource MutedBrush}" /><ComboBox x:Name="OrientationInput" Margin="0,4,0,0"><ComboBoxItem Content="Landscape" /><ComboBoxItem Content="Portrait" /></ComboBox></StackPanel>
         </Grid>
         <TextBlock Text="Accent color (hex)" Foreground="{StaticResource MutedBrush}" />
-        <TextBox x:Name="AccentInput" Margin="0,4,0,16" />
+        <Grid Margin="0,4,0,16">
+          <Grid.ColumnDefinitions><ColumnDefinition Width="*" /><ColumnDefinition Width="Auto" /></Grid.ColumnDefinitions>
+          <TextBox x:Name="AccentInput" VerticalContentAlignment="Center" />
+          <Button Grid.Column="1" Content="Choose color..." Margin="8,0,0,0" Click="ChooseAccentButton_Click" />
+        </Grid>
 
         <TextBlock Text="REPORT CONTENT" Foreground="{StaticResource AccentBrush}" FontSize="10" FontWeight="Bold" Margin="0,0,0,10" />
         <UniformGrid Columns="2" Margin="0,0,0,8">
